@@ -18,8 +18,9 @@ function [MCprice,MCSE] = monte_carlo(S0,K,B,r,q,T,Nmc,M)
         for t=1:M-1 
             %Calculate terms here for performance
             Z = randn; %Generate Z from N(0,1)
-            DETERM = (r-q-0.5*vol(S(i,t),Tvals(t)))*(Tvals(t+1)-Tvals(t)); %First term in the exponential
-            DRIFT = vol(S(i,t),Tvals(t))*sqrt(Tvals(t+1)-Tvals(t))*Z; %Second term in the exponential
+            sig = vol(S(i,t),Tvals(t));
+            DETERM = (r-q-0.5*sig^2)*(Tvals(t+1)-Tvals(t)); %First term in the exponential
+            DRIFT = sig*sqrt(Tvals(t+1)-Tvals(t))*Z; %Second term in the exponential
 
             %Standard sample
             S(i,t+1) = S(i,t)*exp(DETERM+DRIFT);

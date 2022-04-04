@@ -1,0 +1,67 @@
+%Explicit FDM Scheme for Black-Scholes PDE
+
+function [price] = explicit(S0,K,B,r,q,T,N,M)
+    %Stock Data
+    Smin = 0;
+    Smax = 4*K;
+    
+    %Price Grid
+    
+    S1 = linspace(Smin,Smax,N+1);
+    dS = S1(2)-S1(1);
+    S = S1(2:N); %Leave first and last out for boundary conditions
+    S1 = zeros()
+
+    %Time Grid
+    tau = linspace(0,T,M+1);
+    dtau = tau(2)-tau(1);
+    
+    %
+    Vold = zeros(N-1,1);
+    Vnew = zeros(N-1,1);
+    
+    %Solve Black-Scholes
+    for k=1:M+1
+           
+        for j=1:N-1
+            %Calculate the parameters alpha and beta
+            sig = vol(S(j),tau(k));
+            alpha = 0.5*(sig^2*S(j)^2)*(dtau/dS^2);
+            beta = (r-q)*S(j)*(dtau/(2*dS));
+    
+            %Lower, middle and upper diagonals of AE matrix
+            l = alpha-beta;
+            d = 1 - r*dtau-2*alpha;
+            u = alpha+beta; 
+    
+            %Boundary codition for up-and-out call explicit method
+            boundary = [l*(2*Vold(1)-Vold(2));zeros(N-3,1);u*(2*Vold(N-1)-Vold(N-2))];
+
+            %Explicit Scheme
+            if(j==1)
+                Vnew(j) = d*Vold(j)+u*Vold(j+1);
+            elseif(j<N-1)
+                Vnew(j) = l*Vold(j-1)+d*Vold(j)+u*Vold(j+1);
+            else
+                Vnew(j) = l*Vold(j-1)+d*Vold(j);
+            end
+        end
+        
+        Vold = Vnew + boundary;
+    end
+    plot(Vold)
+    price = 0;
+end
+
+function h = payoff(Svals,K,B,M)
+    if max(Svals) < B
+        h = max(Svals(M)-K,0);
+    else
+        h = 0;
+    end
+end
+
+%Function used here for calculating local volatility
+function sig = vol(s,t)
+    sig = 0.25*exp(-t)*(100/s)^0.35;
+end

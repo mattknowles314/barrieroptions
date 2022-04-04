@@ -9,18 +9,22 @@ T = 0.5; %Time to maturity (years)
 %Simulation Data
 Nmc = 100; %Number of simulations
 M = 1000; %Number of time steps
+N = 1000;
 
 %Test Data
-Ntests = 100;
-priceVals = zeros(1,Ntests);
-errorVals = zeros(1,Ntests);
-for n = 1:Ntests
-    [price,error] = monte_carlo(S0,K,B,r,q,T,n,M);
-    priceVals(n) = price;
-    errorVals(n) = error;
-end
+%Ntests = 100;
+%priceVals = zeros(1,Ntests);
+%errorVals = zeros(1,Ntests);
+%for n = 1:Ntests
+%    [price,error] = monte_carlo(S0,K,B,r,q,T,n,M);
+%    priceVals(n) = price;
+%    errorVals(n) = error;
+%end
 
 %plot(errorVals)
 %title("Standard error, with antithetic sampling")
 %xlabel("Number of samples in Monte Carlo simmulation")
 %ylabel("Standard Error")
+
+
+[price] = explicit(S0,K,B,r,q,T,N,M);
