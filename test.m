@@ -8,8 +8,8 @@ T = 0.5; %Time to maturity (years)
 
 %Simulation Data
 Nmc = 100; %Number of simulations
-M = 1000; %Number of time steps
-N = 1000;
+M = 500; %Number of time steps
+N = 500;
 
 %Test Data
 %Ntests = 100;
@@ -27,4 +27,4 @@ N = 1000;
 %ylabel("Standard Error")
 
 
-[price] = explicit(S0,K,B,r,q,T,N,M);
+%[price] = explicit(S0,K,B,r,q,T,N,M);
