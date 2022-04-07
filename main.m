@@ -11,10 +11,10 @@ Nmc = 100; %Number of simulations
 M = 500; %Number of time steps
 N = 500; %Number of space steps
 
-%[MCPrice, MCError] = monte_carlo(S0,K,B,r,q,T,Nmc,M);
-%EXPPrice = explicit(S0,K,B,r,q,T,N,M);
+[MCPrice, MCError] = monte_carlo(S0,K,B,r,q,T,Nmc,M);
+EXPPrice = explicit(S0,K,B,r,q,T,N,M);
 IMPPrice = implicit(S0,K,B,r,q,T,N,M);
 
-%MCPrice
-%EXPPrice
-IMPPrice
+MCPrice
+EXPPrice
+IMPPricebbc
