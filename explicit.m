@@ -61,22 +61,18 @@ function [price] = explicit(S0,K,B,r,q,T,N,M)
         end
     end
     
-    %Boundary conditions
-    boundary = [L(1)*(2*V(1)-V(2));zeros(N-1,1);U(N-1)*(2*V(N-1)-V(N-2))];
-    
-    %Solve Black-Scholes PDE
     for j=1:M
-        for k=1:N+1
-            if(j==1)
-                Vnew(j) = D(j,k)*V(j) + U(j,k)*V(j+1);
-            elseif(j<N-1)
-                Vnew(j) = L(j,k)*V(j-1) + D(j,k)*V(j) + U(j,k)*V(j+1);
-            else
-                Vnew(j) = L(j,k)*V(j-1) + D(j,k)*V(j);
-            end
-        end
-        V = Vnew+boundary;
+        AE_1 = diag(D(j,:));
+        AE_2 = diag(U(j,1:N),1);
+        AE_3 = diag(L(j,1:N),-1);
+        AE = AE_1 + AE_2 + AE_3;
+        
+        boundary = [L(1,j)*V(1);zeros(N-1,1);U(M,j)*V(N+1)];
+        
+        Vnew = AE*V+boundary;
+        
     end
+    V = Vnew;
 
     %Use 1D Interpolation to price the option at S0
     price = interp1(S,V,S0); 
