@@ -1,7 +1,7 @@
 %Explicit FDM Scheme for Black-Scholes PDE
 
 function [price] = explicit(S0,K,B,r,q,T,N,M)
-    %Stock Data
+%Stock Data
     Smin = 0;
     Smax = 4*K;
     
@@ -28,9 +28,9 @@ function [price] = explicit(S0,K,B,r,q,T,N,M)
     
     %Matrix for storing volatility at different points on the grid
     sigs = zeros(N+1,M);
-    for j = 2:M
-        for k = 2:N+1
-            sigs(j,k) = 0.25*exp(-tau(j))*(100/S(k))^0.35;
+    for j = 2:N
+        for k = 2:M+1
+            sigs(j,k) = 0.25*exp(-tau(k))*(100/S(j))^0.35;
     
         end
     end
@@ -48,31 +48,30 @@ function [price] = explicit(S0,K,B,r,q,T,N,M)
     end
     
     %Matrices for storing upper and lower diagonals
-    L = zeros(M,N+1);
-    D = zeros(M,N+1);
-    U = zeros(M,N+1);
+    L = zeros(M+1,N+1);
+    D = zeros(M+1,N+1);
+    U = zeros(M+1,N+1);
     
     %Calculate lower, main and upper diagonal values
     for j=1:M
-        for k=1:N+1
+        for k=1:N
             L(j,k) = Alpha(j,k)-Beta(j,k);
             D(j,k) = 1-(r*dtau)-(2*Alpha(j,k));
             U(j,k) = Alpha(j,k)+Beta(j,k);
         end
     end
     
-    for j=1:M
-        AE_1 = diag(D(j,:));
-        AE_2 = diag(U(j,1:N),1);
-        AE_3 = diag(L(j,1:N),-1);
+    %Solve Black-Scholes PDE
+    for k=1:M
+        AE_1 = diag(D(k,:));
+        AE_2 = diag(U(k,1:N),1);
+        AE_3 = diag(L(k,1:N),-1);
         AE = AE_1 + AE_2 + AE_3;
-        
-        boundary = [L(1,j)*V(1);zeros(N-1,1);U(M,j)*V(N+1)];
+        boundary = [L(k,1)*V(1);zeros(N-1,1);U(k,N)*V(N+1)];
         
         Vnew = AE*V+boundary;
         
     end
     V = Vnew;
-
     %Use 1D Interpolation to price the option at S0
     price = interp1(S,V,S0); 
