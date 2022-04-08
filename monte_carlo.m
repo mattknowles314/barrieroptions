@@ -18,7 +18,7 @@ function [MCprice,MCSE] = monte_carlo(S0,K,B,r,q,T,Nmc,M)
         for t=1:M-1 
             %Calculate terms here for performance
             Z = randn; %Generate Z from N(0,1)
-            sig = vol(S(i,t),Tvals(t));
+            sig = vol(S(i,t),Tvals(t)); %Calculate local volatility
             DETERM = (r-q-0.5*sig^2)*(Tvals(t+1)-Tvals(t)); %First term in the exponential
             DRIFT = sig*sqrt(Tvals(t+1)-Tvals(t))*Z; %Second term in the exponential
 
@@ -29,22 +29,20 @@ function [MCprice,MCSE] = monte_carlo(S0,K,B,r,q,T,Nmc,M)
             SA(i,t+1) = SA(i,t)*exp(DETERM-DRIFT);
 
         end
-        hVals(i) = payoff(S(i,:),K,B,M);
-        hValsAntiThetic(i) = payoff(SA(i,:),K,B,M);
+        hVals(i) = payoff(S(i,:),K,B,M); %Calculate payoff for standard sample
+        hValsAntiThetic(i) = payoff(SA(i,:),K,B,M); %Calculate payoff for antithetic sample
     end
     
     %Compute estimate
     MCprice = (sum(hVals)+sum(hValsAntiThetic))/(2*Nmc);
-    
-
 
     %Standard error
     subSum = 0;
     NC = Nmc*MCprice; %Calculate this term of the sum here for efficiency
     for i = 1:Nmc
-        subSum = subSum + ((hVals(i)+hValsAntiThetic(i))/2)^2;
+        subSum = subSum + ((hVals(i)+hValsAntiThetic(i))/2)^2; %Incrament sum
     end
-    MCSE = sqrt((subSum-NC)/(Nmc*(Nmc-1)));
+    MCSE = sqrt((subSum-NC)/(Nmc*(Nmc-1))); %Calculate error
 end
 
 %Payoff for up-and-out barrier option

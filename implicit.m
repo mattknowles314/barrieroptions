@@ -1,10 +1,10 @@
+%Implicit FDM Scheme for Black-Scholes PDE
 function [price] = implicit(S0,K,B,r,q,T,N,M)
-%Stock Data
+    %Stock Data
     Smin = 0;
     Smax = 4*K;
     
     %Price Grid
-    
     S = linspace(Smin,Smax,N+1);
     dS = S(2)-S(1);
     S1 = S(2:N+1);
@@ -34,7 +34,8 @@ function [price] = implicit(S0,K,B,r,q,T,N,M)
         end
     end
     
-    %Matrices for storing values of Alpha and Beta at a given point
+    %Matrices for storing values of Alpha and Beta at a given point along
+    %the grid.
     Alpha = zeros(M,N+1);
     Beta = zeros(M,N+1);
     
@@ -62,15 +63,18 @@ function [price] = implicit(S0,K,B,r,q,T,N,M)
     
     %Solve Black-Scholes PDE
     for k=1:M-1
+        %Neumann boundary conditions values
         D1 = D(k+1,1) + 2*L(k+1,1);
         DN = D(k+1,N) + 2*U(k+1,N);
         U1 = U(k+1,1) - L(k+1,1);
         LN = L(k+1,N) - U(k+1,N);
         
+        %Diagonals for this time step
         Dx = [D1,D(k,1:N-1),DN];
         Ux = [U1,U(k,1:N)];
         Lx = [L(k,1:N),LN];
         
+        %Solve tridiagonal system
         Vnew = tridiag(Dx,Ux,Lx,V);
     end
     V = Vnew;
@@ -79,6 +83,7 @@ function [price] = implicit(S0,K,B,r,q,T,N,M)
     price = interp1(S1,V,S0);
 end
 
+%Tridiagonal system solver by Dr. Francesco Cosentino
 function x = tridiag (Dx,Ux,Lx,B)
   n = length(B)-1;
   x = zeros(n,1);

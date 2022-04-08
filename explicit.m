@@ -1,7 +1,6 @@
 %Explicit FDM Scheme for Black-Scholes PDE
-
 function [price] = explicit(S0,K,B,r,q,T,N,M)
-%Stock Data
+    %Stock Data
     Smin = 0;
     Smax = 4*K;
     
@@ -30,8 +29,7 @@ function [price] = explicit(S0,K,B,r,q,T,N,M)
     sigs = zeros(N+1,M);
     for j = 2:N
         for k = 2:M+1
-            sigs(j,k) = 0.25*exp(-tau(k))*(100/S(j))^0.35;
-    
+            sigs(j,k) = 0.25*exp(-tau(k))*(100/S(j))^0.35; %Calculate local volatility
         end
     end
     
@@ -47,7 +45,7 @@ function [price] = explicit(S0,K,B,r,q,T,N,M)
         end
     end
     
-    %Matrices for storing upper and lower diagonals
+    %Matrices for storing main, upper and lower diagonals
     L = zeros(M+1,N+1);
     D = zeros(M+1,N+1);
     U = zeros(M+1,N+1);
@@ -63,15 +61,19 @@ function [price] = explicit(S0,K,B,r,q,T,N,M)
     
     %Solve Black-Scholes PDE
     for k=1:M
-        AE_1 = diag(D(k,:));
-        AE_2 = diag(U(k,1:N),1);
-        AE_3 = diag(L(k,1:N),-1);
-        AE = AE_1 + AE_2 + AE_3;
+        %Calculate AE matrix 
+        AE_1 = diag(D(k,:)); %Main diagonal
+        AE_2 = diag(U(k,1:N),1); %Upper diagonal
+        AE_3 = diag(L(k,1:N),-1); %Lower diagonal
+        AE = AE_1 + AE_2 + AE_3; %Calculate AE
+
+        %Calcualte boundary condition
         boundary = [L(k,1)*V(1);zeros(N-1,1);U(k,N)*V(N+1)];
         
+        %Calculate price at next time step
         Vnew = AE*V+boundary;
-        
     end
-    V = Vnew;
+    V = Vnew; %Update prices
+
     %Use 1D Interpolation to price the option at S0
     price = interp1(S,V,S0); 

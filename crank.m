@@ -1,9 +1,10 @@
+%Crank Nicholson FDM Scheme for Black-Scholes PDE
 function [price] = crank(S0,K,B,r,q,T,N,M)
+    %Stock Data
     Smin = 0;
     Smax = 4*K;
     
-    %Price Grid
-        
+    %Price Grid    
     S = linspace(Smin,Smax,N+1);
     dS = S(2)-S(1);
     
@@ -23,15 +24,17 @@ function [price] = crank(S0,K,B,r,q,T,N,M)
     end
     Vnew = V;
     
-    %Tridiagonals for implicit scheme
+    %Diagonals for implicit scheme
     LI = ones(M+1,N+1);
     UI = ones(M+1,N+1);
     DI = ones(M+1,N+1);
     
+    %Diagonals for explicit scheme
     LE = ones(M+1,N+1);
     UE = ones(M+1,N+1);
     DE = ones(M+1,N+1);
         
+    %Calculate these constants here for efficiency 
     diffTau1 = dtau/(dS)^2;
     diffTau2 = dtau/(2*dS);
         
@@ -72,13 +75,15 @@ function [price] = crank(S0,K,B,r,q,T,N,M)
         AI_U = UI(k,:);
         AI_L = LI(k,:);
     
-        Vnew = tridiag(AI_D,AI_U,AI_L,VRHS); %Why is this shrinking?
+        %Solve Tridiagonal system
+        Vnew = tridiag(AI_D,AI_U,AI_L,VRHS); 
     end
-    V = Vnew;
+    V = Vnew; %Update price
     
-    price = interp1(S,V,S0)
+    price = interp1(S,V,S0);
 end
 
+%Tridiagonal system solver by Dr. Francesco Cosentino
 function x = tridiag (Dx,Ux,Lx,B)
   n = length(B);
   x = zeros(n,1);
